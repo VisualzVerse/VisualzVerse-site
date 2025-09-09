@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VisualzVerse</title>
+<meta name="description" content="VisualzVerse — next-gen visuals for serious creators." />
+
+<!-- Free icons (Font Awesome Free) -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+<style>
+  :root{
+    --vv-red: rgba(255, 45, 45, 0.85);
+    --vv-red-glow: 0 0 30px rgba(255, 45, 45, 0.55), 0 0 60px rgba(255, 45, 45, 0.35);
+    --vv-bg: #0a0a0f;
+    --vv-text: #f3f4f6;
+    --vv-muted: #9ca3af;
+    --vv-card: #12121a;
+    --vv-border: rgba(255,255,255,.08);
+  }
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--vv-bg);color:var(--vv-text);font-family:system-ui,-apple-system,Segoe UI,Inter,Roboto,sans-serif}
+
+  /* Grid background */
+  .grid-bg{position:relative;isolation:isolate}
+  .grid-bg::before{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(transparent 31px, rgba(255,255,255,.06) 32px),
+      linear-gradient(90deg, transparent 31px, rgba(255,255,255,.06) 32px);
+    background-size:32px 32px;opacity:.25;z-index:-1;
+  }
+
+  /* Nav */
+  .vv-nav{position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,rgba(10,10,15,.7),rgba(10,10,15,0));backdrop-filter:blur(6px);border-bottom:1px solid var(--vv-border)}
+  .vv-nav__inner{max-width:1200px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+  .vv-logo{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--vv-text);font-weight:800}
+  .vv-logo .mark{width:28px;height:28px;border-radius:6px;background:var(--vv-red);box-shadow:var(--vv-red-glow)}
+  .vv-nav__links{display:flex;gap:14px;align-items:center}
+  .vv-link{color:var(--vv-text);text-decoration:none;opacity:.85}
+  .vv-link:hover{opacity:1}
+
+  /* Mobile bottom CTA */
+  .vv-mobile-cta{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:70;display:none}
+  @media (max-width:768px){.vv-nav__links a:not(.vv-btn){display:none}.vv-mobile-cta{display:inline-flex}}
+
+  /* Buttons */
+  .vv-btn{--p:10px 16px;display:inline-flex;align-items:center;gap:8px;padding:var(--p);border-radius:999px;border:1px solid rgba(255,255,255,.15);text-decoration:none;cursor:pointer;transition:transform .08s ease, box-shadow .2s ease, opacity .2s ease}
+  .vv-btn--red{background:var(--vv-red);color:#fff;box-shadow:var(--vv-red-glow)}
+  .vv-btn:active{transform:translateY(1px) scale(.99)}
+
+  /* Section wrap */
+  .wrap{max-width:1200px;margin:0 auto;padding:40px 20px}
+
+  /* Hero */
+  .vv-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:24px}
+  @media (max-width:900px){.vv-hero{grid-template-columns:1fr;}}
+  .vv-hero__title{font-size:clamp(32px,6vw,56px);margin:0 0 8px}
+  .vv-hero__sub{color:var(--vv-muted);margin:0 0 16px}
+  .vv-video-wrap{position:relative;width:100%;max-width:960px;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;border:1px solid var(--vv-border);margin-left:auto}
+  .vv-video-wrap iframe,.vv-video-wrap video{width:100%;height:100%;display:block}
+  .vv-unmute{position:absolute;bottom:12px;right:12px}
+
+  /* Stats */
+  .vv-stats{display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .vv-stat{background:var(--vv-card);border:1px solid var(--vv-border);border-radius:12px;padding:12px 16px;text-align:center;min-width:160px}
+  .vv-num{font-size:clamp(24px,6vw,40px);font-weight:800;display:block}
+  .vv-label{color:var(--vv-muted)}
+
+  /* Features / info cards */
+  .vv-features{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:900px){.vv-features{grid-template-columns:1fr 1fr}}
+  @media (max-width:640px){.vv-features{grid-template-columns:1fr}}
+  .vv-card{background:var(--vv-card);border:1px solid var(--vv-border);border-radius:14px;padding:16px;transition:transform .25s ease, box-shadow .25s ease}
+  .vv-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .vv-card__title{margin:0 0 6px}
+  .vv-card__media{border-radius:10px;overflow:hidden;aspect-ratio:16/9;background:#000;margin-bottom:10px;display:grid;place-items:center;color:#777}
+  .vv-card__media img{width:100%;height:100%;object-fit:cover;display:block}
+  .vv-card__icon{font-size:28px;color:#fff;opacity:.9}
+
+  /* Portfolio grid */
+  .vv-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:900px){.vv-cards{grid-template-columns:1fr 1fr}}
+  @media (max-width:640px){.vv-cards{grid-template-columns:1fr}}
+
+  /* Carousel 9:16 */
+  .vv-carousel{position:relative;margin-top:18px}
+  .vv-carousel__track{display:flex;gap:10px;overflow:auto;scroll-snap-type:x mandatory;padding:6px;border:1px solid var(--vv-border);border-radius:12px}
+  .vv-slide{flex:0 0 70%;scroll-snap-align:center}
+  .vv-916{aspect-ratio:9/16;width:100%;background:#000;border-radius:12px;overflow:hidden;display:grid;place-items:center;color:#777}
+  .vv-916 iframe,.vv-916 video,.vv-916 img{width:100%;height:100%;object-fit:cover;display:block}
+  .vv-carousel__btn{position:absolute;top:50%;transform:translateY(-50%);background:rgba(0,0,0,.4);border:1px solid var(--vv-border);border-radius:999px;padding:10px;cursor:pointer}
+  .vv-carousel__btn.prev{left:6px}.vv-carousel__btn.next{right:6px}
+
+  /* Timeline */
+  .vv-steps{list-style:none;margin:0;padding:0;counter-reset:step}
+  .vv-step{position:relative;padding-left:44px;margin:16px 0;filter:blur(2px);opacity:.7;transition:filter .4s ease, opacity .4s ease}
+  .vv-step::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--vv-border)}
+  .vv-step.is-active{filter:none;opacity:1}
+
+  /* FAQ */
+  .vv-accordion .vv-item{border-bottom:1px solid var(--vv-border)}
+  .vv-acc__btn{width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:14px 0;background:none;border:none;color:var(--vv-text);font:inherit;cursor:pointer}
+  .vv-acc__panel{display:none;padding:0 0 12px 0;color:var(--vv-muted)}
+  .vv-item.open .vv-acc__panel{display:block}
+  .vv-arrow{transition:transform .2s ease}
+  .vv-item.open .vv-arrow{transform:rotate(90deg)}
+
+  /* Footer */
+  .vv-footer{text-align:center}
+
+  /* Exit Intent Modal */
+  .vv-modal{position:fixed;inset:0;display:grid;place-items:center;z-index:999}
+  .vv-modal[hidden]{display:none}
+  .vv-modal__backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
+  .vv-modal__dialog{position:relative;background:var(--vv-card);color:var(--vv-text);border:1px solid var(--vv-border);border-radius:14px;padding:20px;width:min(480px,92vw)}
+  .vv-modal__close{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--vv-text);font-size:22px;cursor:pointer}
+
+  /* Scroll animations */
+  [data-anim]{opacity:0;transform:translateY(12px);transition:opacity .6s ease, transform .6s ease, filter .6s ease}
+  [data-anim].in{opacity:1;transform:none}
+  [data-anim="blur-in"]{filter:blur(6px)} [data-anim="blur-in"].in{filter:none}
+  [data-anim="zoom-in"]{transform:scale(.98)} [data-anim="zoom-in"].in{transform:none}
+  [data-anim="slide-in"]{transform:translateY(-6px)} [data-anim="slide-in"].in{transform:none}
+  [data-anim="glide"]{transform:translateX(-8px)} [data-anim="glide"].in{transform:none}
+
+  /* Lazy visual */
+  img.lazy, iframe.lazy, video.lazy{opacity:.001;transition:opacity .4s ease}
+  .is-loaded{opacity:1}
+</style>
+</head>
+<body id="top">
+
+  <!-- NAV -->
+  <header class="vv-nav" data-anim="slide-in" aria-label="Main">
+    <div class="vv-nav__inner">
+      <a class="vv-logo" href="#top" aria-label="VisualzVerse home">
+        <span class="mark" aria-hidden="true"></span>
+        <span>VisualzVerse</span>
+      </a>
+      <nav class="vv-nav__links" aria-label="Primary">
+        <a href="#portfolio" class="vv-link">Portfolio</a>
+        <a href="#faq" class="vv-link">FAQ</a>
+        <a href="#timeline" class="vv-link">Timeline</a>
+        <a href="#contact" class="vv-btn vv-btn--red">GET ACCESS</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MOBILE CTA -->
+  <a class="vv-mobile-cta vv-btn vv-btn--red" href="#contact">GET ACCESS</a>
+
+  <!-- HERO -->
+  <section id="hero" class="grid-bg">
+    <div class="wrap vv-hero" data-anim="fade-in">
+      <div>
+        <h1 class="vv-hero__title">Craft Viral Visuals That Grow Your Brand</h1>
+        <p class="vv-hero__sub">From concept to conversion — we design, edit and optimize content that performs.</p>
+        <div class="vv-hero__actions">
+          <a href="#portfolio" class="vv-btn vv-btn--red"><i class="fa-solid fa-bolt"></i> See portfolio</a>
+          <a href="#faq" class="vv-link">How it works</a>
+        </div>
+      </div>
+      <div class="vv-video-wrap" aria-label="Hero video widescreen">
+        <!-- Your requested YouTube hero video (autoplay muted loop) -->
+        <iframe
+          id="heroYT"
+          class="lazy"
+          title="Hero video"
+          loading="lazy"
+          allow="autoplay; encrypted-media"
+          src="https://www.youtube.com/embed/LXb3EKWsInQ?autoplay=1&mute=1&loop=1&playlist=LXb3EKWsInQ&controls=1&rel=0&modestbranding=1&enablejsapi=1"
+        ></iframe>
+        <!-- Optional unmute button for YT (will attempt via API) -->
+        <button id="unmuteBtn" class="vv-unmute vv-btn vv-btn--red" aria-pressed="false"><i class="fa-solid fa-volume-high"></i> Unmute</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section id="stats">
+    <div class="wrap vv-stats" data-anim="blur-in">
+      <div class="vv-stat"><span class="vv-num" data-count="800000">0</span><span class="vv-label">Followers</span></div>
+      <div class="vv-stat"><span class="vv-num" data-count="8000000">0</span><span class="vv-label">Likes</span></div>
+      <div class="vv-stat"><span class="vv-num" data-count="120000000">0</span><span class="vv-label">Views</span></div>
+    </div>
+  </section>
+
+  <!-- FEATURES / INFO CARDS -->
+  <section id="features" class="grid-bg">
+    <div class="wrap" data-anim="zoom-in">
+      <h2 class="center" style="margin:0 0 8px">What You Get</h2>
+      <p class="center" style="margin:0 0 18px"><span class="muted">High-impact content production, brand growth strategy, and seamless delivery.</span></p>
+
+      <div class="vv-features">
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1529336953121-01d274885d66?auto=format&fit=crop&w=1600&q=80" alt="Editing desk" />
+          </div>
+          <div class="vv-card__icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <h3 class="vv-card__title">Editing That Pops</h3>
+          <p>Snappy cuts, bold motion, and modern pacing designed to keep people watching.</p>
+        </article>
+
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=1600&q=80" alt="Strategy board" />
+          </div>
+          <div class="vv-card__icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h3 class="vv-card__title">Growth Strategy</h3>
+          <p>Content pillars, hooks, and formats that convert views to followers and clients.</p>
+        </article>
+
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=1600&q=80" alt="Delivery" />
+          </div>
+          <div class="vv-card__icon"><i class="fa-solid fa-truck"></i></div>
+          <h3 class="vv-card__title">Done-For-You Delivery</h3>
+          <p>We handle editing, thumbnails, captions, and schedule — you focus on creating.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="portfolio">
+    <div class="wrap" data-anim="zoom-in">
+      <h2>Portfolio</h2>
+
+      <div class="vv-cards">
+        <!-- Free CC0 sample video (hover = play muted, click = unmute+restart) -->
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <video class="vv-card__video" muted loop preload="none" poster="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80">
+              <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
+            </video>
+          </div>
+          <h3>Fast Macro Cuts</h3>
+          <p class="muted">Hover to preview · Click to unmute</p>
+        </article>
+
+        <!-- Image placeholder -->
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1495562569060-2eec283d3391?auto=format&fit=crop&w=1600&q=80" alt="Before/after" />
+          </div>
+          <h3>Before → After</h3>
+          <p class="muted">Color, pacing, text overlays</p>
+        </article>
+
+        <!-- Image placeholder -->
+        <article class="vv-card animated-click" data-anim="glide">
+          <div class="vv-card__media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1495567720989-cebdbdd97913?auto=format&fit=crop&w=1600&q=80" alt="Storyboard" />
+          </div>
+          <h3>Hook-First Storyboards</h3>
+          <p class="muted">3-second hook + payoff</p>
+        </article>
+      </div>
+
+      <!-- 9:16 CAROUSEL — your Shorts embeds -->
+      <div class="vv-carousel" data-anim="slide-in" aria-label="Vertical reel carousel">
+        <button class="vv-carousel__btn prev" aria-label="Previous">&#10094;</button>
+        <div class="vv-carousel__track" tabindex="0">
+          <div class="vv-slide">
+            <div class="vv-916">
+              <iframe loading="lazy" title="Short 1"
+                src="https://www.youtube.com/embed/YE98mUTN3BI?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="vv-slide">
+            <div class="vv-916">
+              <iframe loading="lazy" title="Short 2"
+                src="https://www.youtube.com/embed/7ovsXa09iHs?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="vv-slide">
+            <div class="vv-916">
+              <iframe loading="lazy" title="Short 3"
+                src="https://www.youtube.com/embed/gYkEHODNwZw?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="vv-slide">
+            <div class="vv-916">
+              <iframe loading="lazy" title="Short 4"
+                src="https://www.youtube.com/embed/qhp-em1UrdY?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+        <button class="vv-carousel__btn next" aria-label="Next">&#10095;</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section id="timeline" class="grid-bg">
+    <div class="wrap" data-anim="blur-in">
+      <h2>Your Path</h2>
+      <ol class="vv-steps">
+        <li class="vv-step" data-anim="glide"><h3>Discover</h3><p>We learn your brand and audience.</p></li>
+        <li class="vv-step" data-anim="glide"><h3>Design</h3><p>We craft visuals that stand out.</p></li>
+        <li class="vv-step" data-anim="glide"><h3>Deploy</h3><p>Publish, test, iterate, scale.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap vv-faq" data-anim="fade-in">
+      <h2>Everything You Want To Know</h2>
+      <div class="vv-accordion" role="tablist">
+        <div class="vv-item">
+          <button class="vv-acc__btn" aria-expanded="false" aria-controls="faq1" id="tab1">
+            What’s included?<span class="vv-arrow" aria-hidden="true">▸</span>
+          </button>
+          <div id="faq1" class="vv-acc__panel" role="region" aria-labelledby="tab1">
+            <p>End-to-end editing, brand systems, captions, and delivery.</p>
+          </div>
+        </div>
+        <div class="vv-item">
+          <button class="vv-acc__btn" aria-expanded="false" aria-controls="faq2" id="tab2">
+            Can I cancel anytime?<span class="vv-arrow" aria-hidden="true">▸</span>
+          </button>
+          <div id="faq2" class="vv-acc__panel" role="region" aria-labelledby="tab2">
+            <p>Yes — monthly billing, no lock-in contracts.</p>
+          </div>
+        </div>
+        <div class="vv-item">
+          <button class="vv-acc__btn" aria-expanded="false" aria-controls="faq3" id="tab3">
+            Do you work with Shorts/Reels?<span class="vv-arrow" aria-hidden="true">▸</span>
+          </button>
+          <div id="faq3" class="vv-acc__panel" role="region" aria-labelledby="tab3">
+            <p>Absolutely — optimized for 9:16 vertical platforms.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPLINE (valgfri) -->
+  <section id="spline" class="grid-bg">
+    <div class="wrap" data-anim="fade-in">
+      <h2>Spline Interaction</h2>
+      <p class="muted">Paste your Spline embed URL into the iframe <em>src</em> below when ready.</p>
+      <div class="vv-card">
+        <div class="vv-card__media">
+          <img loading="lazy" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80" alt="3D preview placeholder" />
+        </div>
+        <div class="vv-card__media" style="margin-top:10px;">
+          <iframe class="lazy" title="Spline scene" loading="lazy" src="" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA / FOOTER -->
+  <footer id="contact" class="grid-bg">
+    <div class="wrap vv-footer" data-anim="fade-in">
+      <h2>Ready to build with VisualzVerse?</h2>
+      <a class="vv-btn vv-btn--red" href="mailto:hello@example.com"><i class="fa-solid fa-envelope"></i> GET ACCESS</a>
+      <p class="muted" style="margin-top:14px;">© <span id="year"></span> VisualzVerse. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- EXIT-INTENT MODAL -->
+  <div id="vv-exit-modal" class="vv-modal" role="dialog" aria-modal="true" aria-labelledby="exitTitle" hidden>
+    <div class="vv-modal__backdrop"></div>
+    <div class="vv-modal__dialog" role="document">
+      <button class="vv-modal__close" aria-label="Close">×</button>
+      <h3 id="exitTitle">Wait! Don’t miss this offer</h3>
+      <p>Join now for just $10/mo. 90-day risk-free guarantee.</p>
+      <a class="vv-btn vv-btn--red" href="#contact">GET ACCESS</a>
+    </div>
+  </div>
+
+<script>
+  // Shorthands
+  const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
+
+  // In-view animations + lazy-load
+  const io=new IntersectionObserver((entries)=>{
+    for(const e of entries){
+      if(e.isIntersecting){
+        e.target.classList.add('in');
+        if(e.target.matches('img.lazy, iframe.lazy, video.lazy')){
+          const src=e.target.dataset?.src || e.target.getAttribute('data-src');
+          if(src){ if(e.target.tagName==='VIDEO'){ e.target.src=src; e.target.load(); } else { e.target.src=src; } }
+          e.target.addEventListener('loadeddata',()=>e.target.classList.add('is-loaded'),{once:true});
+          e.target.addEventListener('load',()=>e.target.classList.add('is-loaded'),{once:true});
+        }
+      }else{
+        e.target.classList.remove('in'); // fade-out when scrolling back
+      }
+    }
+  },{threshold:.15});
+  $$('[data-anim], img.lazy, iframe.lazy, video.lazy]').forEach(el=>io.observe(el));
+
+  // Stats counters
+  let countersStarted=false;
+  const counters=$$('.vv-num');
+  const countersIO=new IntersectionObserver((es)=>{
+    es.forEach(e=>{
+      if(e.isIntersecting && !countersStarted){
+        countersStarted=true; counters.forEach(el=>animateCount(el)); countersIO.disconnect();
+      }
+    });
+  },{threshold:.5});
+  if(counters.length){ counters.forEach(el=>countersIO.observe(el)); }
+  function animateCount(el){
+    const target=Number(el.dataset.count||0);
+    const dur=1600;
+    const start=performance.now();
+    const fmt=n=>new Intl.NumberFormat().format(Math.floor(n));
+    function tick(now){
+      const t=Math.min(1,(now-start)/dur);
+      const eased=1-Math.pow(1-t,3);
+      el.textContent=fmt(target*eased);
+      if(t<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Portfolio video hover/click behavior
+  $$('.vv-card__video').forEach(v=>{
+    v.addEventListener('mouseenter',()=>{ try{ v.muted=true; v.play(); }catch{} });
+    v.addEventListener('mouseleave',()=>{ try{ v.pause(); }catch{} });
+    v.addEventListener('click',()=>{ try{ v.muted=false; v.currentTime=0; v.play(); }catch{} });
+  });
+
+  // Carousel buttons
+  const track=$('.vv-carousel__track');
+  if(track){
+    $('.vv-carousel__btn.prev')?.addEventListener('click',()=>track.scrollBy({left:-track.clientWidth*0.8,behavior:'smooth'}));
+    $('.vv-carousel__btn.next')?.addEventListener('click',()=>track.scrollBy({left: track.clientWidth*0.8,behavior:'smooth'}));
+  }
+
+  // Timeline highlight when active
+  const stepIO=new IntersectionObserver((ents)=>{ ents.forEach(e=> e.target.classList.toggle('is-active', e.isIntersecting)); }, {threshold:.6});
+  $$('.vv-step').forEach(s=>stepIO.observe(s));
+
+  // FAQ accordion (one open at a time)
+  const accBtns=$$('.vv-acc__btn');
+  accBtns.forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const item=btn.closest('.vv-item');
+      const open=item.classList.contains('open');
+      $$('.vv-item').forEach(i=>i.classList.remove('open'));
+      if(!open){ item.classList.add('open'); }
+    });
+  });
+
+  // Exit-intent modal (once per user)
+  const MODAL_KEY='vv-exit-intent-shown';
+  const modal=$('#vv-exit-modal');
+  function showModal(){
+    if(!modal || localStorage.getItem(MODAL_KEY)) return;
+    modal.hidden=false; localStorage.setItem(MODAL_KEY,'1');
+
+    // focus trap
+    const focusable = $$('a,button,[tabindex]:not([tabindex="-1"])', modal);
+    const first=focusable[0], last=focusable[focusable.length-1];
+    first?.focus();
+    modal.addEventListener('keydown',(e)=>{
+      if(e.key==='Escape') closeModal();
+      if(e.key==='Tab'){
+        if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last?.focus(); }
+        else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first?.focus(); }
+      }
+    });
+  }
+  function closeModal(){ if(modal) modal.hidden=true; }
+  $('.vv-modal__backdrop')?.addEventListener('click', closeModal);
+  $('.vv-modal__close')?.addEventListener('click', closeModal);
+  document.addEventListener('mousemove',(e)=>{ if(e.clientY<10) showModal(); }, {once:true});
+
+  // Footer year
+  const y=$('#year'); if(y) y.textContent=(new Date()).getFullYear();
+
+  // YouTube hero: try unmute via player API if user clicks the button
+  (function setupYT(){
+    const btn=$('#unmuteBtn');
+    const iframe=$('#heroYT');
+    if(!btn || !iframe) return;
+
+    // Load YouTube Iframe API
+    const tag=document.createElement('script');
+    tag.src="https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    let player=null;
+    window.onYouTubeIframeAPIReady=function(){
+      player=new YT.Player('heroYT',{
+        events:{
+          'onReady':(e)=>{ /* already autoplaying muted */ },
+        },
+        playerVars:{ 'origin': window.location.origin }
+      });
+    };
+
+    btn.addEventListener('click', ()=>{
+      try{
+        if(player){
+          player.unMute();
+          player.seekTo(0, true);
+          player.playVideo();
+          btn.style.display='none';
+          btn.setAttribute('aria-pressed','true');
+        } else {
+          // Fallback: reload without mute param
+          const base="https://www.youtube.com/embed/LXb3EKWsInQ";
+          iframe.src=base+"?autoplay=1&loop=1&playlist=LXb3EKWsInQ&controls=1&rel=0&modestbranding=1";
+          btn.style.display='none';
+        }
+      }catch(e){ /* ignore */ }
+    });
+  })();
+</script>
+</body>
+</html>
