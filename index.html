@@ -1,22 +1,593 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DEPLOY TEST</title>
-<style>
-  html,body{height:100%;margin:0}
-  .ok{display:grid;place-items:center;height:100%;
-      background:repeating-linear-gradient(45deg,#6b46c1,#6b46c1 20px,#805ad5 20px,#805ad5 40px);
-      color:#fff;font:700 28px/1.2 system-ui,-apple-system,Segoe UI,Inter,Roboto,sans-serif;text-align:center;padding:20px}
-  .ok small{display:block;font-weight:500;margin-top:8px;opacity:.85}
-  a.btn{margin-top:18px;display:inline-block;background:#ff2d2d;color:#fff;
-        padding:10px 16px;border-radius:999px;text-decoration:none;
-        box-shadow:0 0 30px rgba(255,45,45,.5)}
-</style></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VisualzVerse — Next-Gen Visuals</title>
+  <meta name="description" content="VisualzVerse — next-gen visuals for serious creators.">
+  <!-- Free icon library (Font Awesome Free) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    /* ===== CSS VARIABLES (Example 2 vibe with VisualzVerse red glow) ===== */
+    :root{
+      --primary: #ff3366;          /* neon red/pink */
+      --secondary: #00ff88;        /* neon green */
+      --dark: #0a0a0a;             /* bg */
+      --dark-2: #151515;           /* card bg */
+      --white: #ffffff;
+      --gray: #9aa1ac;
+      --muted: #8a8f9a;
+      --glow: 0 0 40px rgba(255,51,102,.5);
+      --grid-line: rgba(255,255,255,.06);
+    }
+
+    /* ===== RESET / BASE ===== */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; background: var(--dark); color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Oxygen, Ubuntu, sans-serif;
+      line-height: 1.6; overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    img, video, iframe { max-width: 100%; display: block; }
+
+    /* ===== GRID BACKGROUND LAYER (subtle) ===== */
+    .grid-bg{ position: relative; isolation: isolate; }
+    .grid-bg::before{
+      content:""; position: absolute; inset: 0; z-index:-1;
+      background:
+        linear-gradient(transparent 31px, var(--grid-line) 32px),
+        linear-gradient(90deg, transparent 31px, var(--grid-line) 32px);
+      background-size: 32px 32px; opacity:.25;
+    }
+
+    /* ===== CONTAINER ===== */
+    .container{ max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+    /* ===== NAV ===== */
+    nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(10,10,10,0.9); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      transition: all .3s ease;
+    }
+    nav.scrolled { background: rgba(10,10,10,0.98); box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+    .nav-wrap { display:flex; justify-content:space-between; align-items:center; padding: 14px 0; }
+    .logo{ display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.3px; }
+    .logo-mark{ width:28px;height:28px;border-radius:8px;background:var(--primary); box-shadow: var(--glow); }
+    .logo-text{ background: linear-gradient(135deg, var(--white), var(--primary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .nav-links{ display:flex; align-items:center; gap:24px; }
+    .nav-links a{ position:relative; opacity:.9; }
+    .nav-links a::after{
+      content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+      background: var(--primary); width:0; margin:auto; transition: width .25s ease;
+    }
+    .nav-links a:hover{ opacity:1; }
+    .nav-links a:hover::after{ width:100%; }
+
+    /* CTA buttons */
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:12px 22px; border-radius:999px;
+          border:1px solid rgba(255,255,255,.15); font-weight:700; }
+    .btn-primary{ background: linear-gradient(135deg, var(--primary), #ff5599); color:#fff; box-shadow: var(--glow); }
+    .btn-primary:active{ transform: translateY(1px) scale(.99); }
+
+    /* Mobile bottom CTA */
+    .mobile-cta{ position: fixed; bottom:14px; left:50%; transform:translateX(-50%);
+      z-index:1100; display:none; }
+    @media (max-width: 768px){ .nav-links a:not(.btn){ display:none; } .mobile-cta{ display:inline-flex; } }
+
+    /* ===== HERO ===== */
+    .hero{ min-height: 92vh; display:grid; align-items:center; padding: 90px 0 40px; position:relative; overflow:hidden; }
+    .hero .container{ display:grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items:center; }
+    @media (max-width: 980px){ .hero .container{ grid-template-columns:1fr; } }
+    .hero h1{
+      font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1.08; margin:0 0 12px;
+      background: linear-gradient(135deg, var(--white) 0%, var(--primary) 50%, var(--secondary) 100%);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    }
+    .hero-sub{ color: var(--gray); max-width: 680px; margin:0 0 18px; }
+    .stats{ display:flex; flex-wrap:wrap; gap:24px; margin: 18px 0 22px; }
+    .stat{ text-align:left; min-width: 130px; }
+    .stat-number{ font-weight:900; font-size: clamp(1.6rem, 4vw, 2.4rem);
+                  background: linear-gradient(45deg, #fff, var(--primary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .stat-label{ color: var(--muted); font-size: .95rem; }
+
+    .hero-video{ position:relative; border:1px solid rgba(255,255,255,.12);
+                 border-radius:16px; overflow:hidden; background:#000; aspect-ratio:16/9; }
+    .hero-video iframe, .hero-video video{ width:100%; height:100%; }
+    .unmute{ position:absolute; right:12px; bottom:12px; }
+
+    /* ===== SECTION TITLES ===== */
+    .section{ padding: 80px 0; }
+    .title{
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      background: linear-gradient(135deg, var(--white), var(--primary));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      text-align:center; margin:0 0 14px;
+    }
+    .subtitle{ text-align:center; color: var(--gray); margin: 0 0 34px; }
+
+    /* ===== FEATURES / CARDS ===== */
+    .grid{ display:grid; gap:24px; }
+    .grid-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+    @media (max-width: 980px){ .grid-3{ grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 640px){ .grid-3{ grid-template-columns: 1fr; } }
+
+    .card{
+      background: linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius:18px; padding: 22px; transition: all .25s ease; position:relative; overflow:hidden;
+    }
+    .card::before{
+      content:""; position:absolute; inset:-50% -50% auto auto; width:200%; height:200%;
+      background: radial-gradient(circle at 20% 20%, var(--primary) 0%, transparent 70%);
+      opacity:0; transition: opacity .25s ease;
+    }
+    .card:hover{ transform: translateY(-6px); border-color: var(--primary); box-shadow: 0 20px 40px rgba(255,51,102,.2); }
+    .card:hover::before{ opacity:.10; }
+    .card h3{ margin:10px 0 6px; }
+    .card p{ color: var(--gray); margin:0; }
+    .card-icon{
+      width:70px; height:70px; border-radius:16px; display:grid; place-items:center; font-size:28px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      box-shadow: var(--glow); color:#000; margin-bottom:10px;
+    }
+    .card-media{ border-radius:12px; overflow:hidden; aspect-ratio:16/9; background:#000; margin-bottom:10px; }
+    .card-media img{ width:100%; height:100%; object-fit:cover; }
+
+    /* ===== PORTFOLIO GRID ===== */
+    .grid-portfolio{ display:grid; gap:20px; grid-template-columns: repeat(3, minmax(0,1fr)); }
+    @media (max-width: 980px){ .grid-portfolio{ grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 640px){ .grid-portfolio{ grid-template-columns: 1fr; } }
+    .p-card .hint{ color: var(--muted); font-size:.9rem; margin-top:6px; }
+
+    /* ===== CAROUSEL (9:16) ===== */
+    .carousel{ position:relative; margin-top: 18px; }
+    .carousel-track{ display:flex; gap:12px; overflow:auto; scroll-snap-type:x mandatory; padding:8px; border:1px solid rgba(255,255,255,.1); border-radius:14px; }
+    .slide{ flex:0 0 70%; scroll-snap-align:center; }
+    .ratio-916{ aspect-ratio: 9/16; border-radius:14px; overflow:hidden; background:#000; }
+    .carousel-btn{
+      position:absolute; top:50%; transform:translateY(-50%); border:1px solid rgba(255,255,255,.2);
+      background: rgba(0,0,0,.45); border-radius:999px; padding:10px; cursor:pointer; color:#fff;
+    }
+    .carousel-btn.prev{ left:6px; } .carousel-btn.next{ right:6px; }
+
+    /* ===== TIMELINE ===== */
+    .steps{ list-style:none; margin:0; padding:0; counter-reset:step; max-width: 900px; margin-inline:auto; }
+    .step{ position:relative; padding-left:48px; margin:18px 0; filter: blur(2px); opacity:.7; transition: filter .4s ease, opacity .4s ease; }
+    .step::before{
+      counter-increment: step; content: counter(step);
+      position:absolute; left:0; top:0; width:34px; height:34px; display:grid; place-items:center;
+      border-radius:50%; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.1);
+    }
+    .step.is-active{ filter:none; opacity:1; }
+
+    /* ===== FAQ ===== */
+    .faq{ max-width:900px; margin-inline:auto; }
+    .faq .item{ border-bottom:1px solid rgba(255,255,255,.1); }
+    .faq .btn{
+      width:100%; background:none; border:none; color:inherit; font:inherit;
+      display:flex; justify-content:space-between; align-items:center; padding:14px 4px; cursor:pointer;
+    }
+    .faq .panel{ display:none; padding:0 0 12px 0; color: var(--gray); }
+    .faq .item.open .panel{ display:block; }
+    .arrow{ transform: rotate(0deg); transition: transform .2s ease; }
+    .item.open .arrow{ transform: rotate(90deg); }
+
+    /* ===== FOOTER ===== */
+    footer{ padding: 70px 0; border-top:1px solid rgba(255,255,255,.08); text-align:center; }
+    .socials{ display:flex; gap:14px; justify-content:center; margin-top:14px; }
+    .socials a{ width:42px; height:42px; border-radius:50%; display:grid; place-items:center;
+                background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); transition:.2s; }
+    .socials a:hover{ background: var(--primary); color:#000; box-shadow: var(--glow); transform: translateY(-3px); }
+
+    /* ===== ANIMATIONS (enter/leave) ===== */
+    [data-anim]{ opacity:0; transform: translateY(14px); transition: opacity .65s ease, transform .65s ease, filter .65s ease; }
+    [data-anim].in{ opacity:1; transform:none; }
+    [data-anim="blur-in"]{ filter: blur(8px); } [data-anim="blur-in"].in{ filter:none; }
+    [data-anim="zoom-in"]{ transform: scale(.98); } [data-anim="zoom-in"].in{ transform:none; }
+    [data-anim="slide-in"]{ transform: translateX(-10px); } [data-anim="slide-in"].in{ transform:none; }
+
+    /* ===== LAZY VISUAL HINT ===== */
+    img.lazy, iframe.lazy, video.lazy{ opacity:.001; transition: opacity .4s ease; }
+    .is-loaded{ opacity:1; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px){
+      .hero{ padding-top: 80px; }
+    }
+  </style>
+</head>
 <body>
-<div class="ok">
-  <div>
-    ✅ GITHUB PAGES KØRER!<small>Hvis du ser dette, er dit deploy korrekt.</small>
-    <div><a class="btn" href="#" onclick="location.reload(true)">Hard refresh</a></div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="container nav-wrap">
+      <a class="logo" href="#top" aria-label="VisualzVerse">
+        <span class="logo-mark" aria-hidden="true"></span>
+        <span class="logo-text">VisualzVerse</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#faq">FAQ</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#contact" class="btn btn-primary"><i class="fa-solid fa-bolt"></i> GET ACCESS</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE STICKY CTA -->
+  <a class="mobile-cta btn btn-primary" href="#contact"><i class="fa-solid fa-rocket"></i> GET ACCESS</a>
+
+  <!-- HERO -->
+  <section id="hero" class="hero grid-bg">
+    <div class="container">
+      <div data-anim="fade-in">
+        <h1>Craft Viral Visuals That Grow Your Brand</h1>
+        <p class="hero-sub">From concept to conversion — we design, edit and optimize content that performs across platforms.</p>
+        <div class="stats">
+          <div class="stat"><div class="stat-number vv-num" data-count="800000">0</div><div class="stat-label">Followers</div></div>
+          <div class="stat"><div class="stat-number vv-num" data-count="8000000">0</div><div class="stat-label">Likes</div></div>
+          <div class="stat"><div class="stat-number vv-num" data-count="120000000">0</div><div class="stat-label">Views</div></div>
+        </div>
+        <a href="#portfolio" class="btn btn-primary"><i class="fa-solid fa-eye"></i> See Portfolio</a>
+      </div>
+
+      <!-- Widescreen hero video (your requested YT) -->
+      <div class="hero-video" data-anim="zoom-in" aria-label="Hero video widescreen">
+        <iframe
+          id="heroYT"
+          class="lazy is-loaded"  <!-- we mark as loaded to show instantly -->
+          title="Hero video"
+          loading="lazy"
+          allow="autoplay; encrypted-media"
+          src="https://www.youtube.com/embed/LXb3EKWsInQ?autoplay=1&mute=1&loop=1&playlist=LXb3EKWsInQ&controls=1&rel=0&modestbranding=1&enablejsapi=1"
+        ></iframe>
+        <button id="unmuteBtn" class="btn btn-primary unmute" aria-pressed="false"><i class="fa-solid fa-volume-high"></i> Unmute</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section grid-bg">
+    <div class="container" data-anim="fade-in">
+      <h2 class="title">What You Get</h2>
+      <p class="subtitle">High-impact content production, brand growth strategy, and seamless delivery.</p>
+
+      <div class="grid grid-3">
+        <article class="card" data-anim="slide-in">
+          <div class="card-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <h3>Editing That Pops</h3>
+          <p>Snappy cuts, bold motion, and pacing designed to keep people watching.</p>
+        </article>
+
+        <article class="card" data-anim="slide-in">
+          <div class="card-icon"><i class="fa-solid fa-chart-line"></i></div>
+          <h3>Growth Strategy</h3>
+          <p>Hooks, formats, and content pillars that convert views to followers and clients.</p>
+        </article>
+
+        <article class="card" data-anim="slide-in">
+          <div class="card-icon"><i class="fa-solid fa-truck"></i></div>
+          <h3>Done-For-You Delivery</h3>
+          <p>We handle editing, thumbnails, captions, and schedule — you focus on creating.</p>
+        </article>
+
+        <article class="card" data-anim="slide-in">
+          <div class="card-media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1529336953121-01d274885d66?auto=format&fit=crop&w=1600&q=80" alt="Editing desk"/>
+          </div>
+          <h3>Pro Workflow</h3>
+          <p>From brief to publish — streamlined processes for speed and quality.</p>
+        </article>
+
+        <article class="card" data-anim="slide-in">
+          <div class="card-media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?auto=format&fit=crop&w=1600&q=80" alt="Delivery"/>
+          </div>
+          <h3>Consistent Delivery</h3>
+          <p>Content calendar, versioning, and fast iterations to stay on trend.</p>
+        </article>
+
+        <article class="card" data-anim="slide-in">
+          <div class="card-media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1495567720989-cebdbdd97913?auto=format&fit=crop&w=1600&q=80" alt="Storyboard"/>
+          </div>
+          <h3>Hook-First Storyboards</h3>
+          <p>We lead with the payoff and build curiosity from second one.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- PORTFOLIO -->
+  <section id="portfolio" class="section">
+    <div class="container" data-anim="zoom-in">
+      <h2 class="title">Portfolio</h2>
+      <p class="subtitle">Hover to preview — click to unmute and restart.</p>
+
+      <div class="grid-portfolio">
+        <article class="card p-card" data-anim="slide-in">
+          <div class="card-media">
+            <video class="p-video" muted loop preload="metadata" poster="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80">
+              <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4">
+            </video>
+          </div>
+          <h3>Fast Macro Cuts</h3>
+          <div class="hint"><i class="fa-solid fa-computer-mouse"></i> Hover preview · Click to unmute</div>
+        </article>
+
+        <article class="card p-card" data-anim="slide-in">
+          <div class="card-media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1495562569060-2eec283d3391?auto=format&fit=crop&w=1600&q=80" alt="Before after"/>
+          </div>
+          <h3>Before → After</h3>
+          <div class="hint"><i class="fa-solid fa-sliders"></i> Color, pacing, text overlays</div>
+        </article>
+
+        <article class="card p-card" data-anim="slide-in">
+          <div class="card-media">
+            <img loading="lazy" src="https://images.unsplash.com/photo-1496307042754-b4aa456c4a2d?auto=format&fit=crop&w=1600&q=80" alt="Concept"/>
+          </div>
+          <h3>Concept to Publish</h3>
+          <div class="hint"><i class="fa-solid fa-lightbulb"></i> Hooks · Payoffs · CTAs</div>
+        </article>
+      </div>
+
+      <!-- 9:16 CAROUSEL (your Shorts) -->
+      <div class="carousel" data-anim="slide-in" aria-label="Vertical reel carousel">
+        <button class="carousel-btn prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="carousel-track" tabindex="0">
+          <div class="slide">
+            <div class="ratio-916">
+              <iframe loading="lazy" title="Short 1"
+                src="https://www.youtube.com/embed/YE98mUTN3BI?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="slide">
+            <div class="ratio-916">
+              <iframe loading="lazy" title="Short 2"
+                src="https://www.youtube.com/embed/7ovsXa09iHs?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="slide">
+            <div class="ratio-916">
+              <iframe loading="lazy" title="Short 3"
+                src="https://www.youtube.com/embed/gYkEHODNwZw?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+          <div class="slide">
+            <div class="ratio-916">
+              <iframe loading="lazy" title="Short 4"
+                src="https://www.youtube.com/embed/qhp-em1UrdY?rel=0&controls=1&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen></iframe>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-btn next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TIMELINE -->
+  <section id="timeline" class="section grid-bg">
+    <div class="container" data-anim="blur-in">
+      <h2 class="title">Your Path</h2>
+      <ol class="steps">
+        <li class="step" data-anim="slide-in"><h3>Discover</h3><p>We learn your brand and audience, map goals and content pillars.</p></li>
+        <li class="step" data-anim="slide-in"><h3>Design</h3><p>We craft visuals that stand out — hooks, motion, text, pacing.</p></li>
+        <li class="step" data-anim="slide-in"><h3>Deploy</h3><p>Publish, test, iterate, scale — consistently and strategically.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section">
+    <div class="container faq" data-anim="fade-in">
+      <h2 class="title">Everything You Want To Know</h2>
+
+      <div class="item">
+        <button class="btn btn--plain" aria-expanded="false"><span><i class="fa-solid fa-circle-question"></i> What’s included?</span><span class="arrow"><i class="fa-solid fa-chevron-right"></i></span></button>
+        <div class="panel"><p>End-to-end editing, brand systems, captions, and delivery.</p></div>
+      </div>
+
+      <div class="item">
+        <button class="btn btn--plain" aria-expanded="false"><span><i class="fa-solid fa-circle-question"></i> Can I cancel anytime?</span><span class="arrow"><i class="fa-solid fa-chevron-right"></i></span></button>
+        <div class="panel"><p>Yes — monthly billing, no lock-in contracts.</p></div>
+      </div>
+
+      <div class="item">
+        <button class="btn btn--plain" aria-expanded="false"><span><i class="fa-solid fa-circle-question"></i> Do you work with Shorts/Reels?</span><span class="arrow"><i class="fa-solid fa-chevron-right"></i></span></button>
+        <div class="panel"><p>Absolutely — optimized for 9:16 vertical platforms.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPLINE (optional) -->
+  <section id="spline" class="section grid-bg">
+    <div class="container" data-anim="fade-in">
+      <h2 class="title">Spline Interaction</h2>
+      <p class="subtitle">Paste your Spline embed URL in the iframe source when ready.</p>
+      <div class="card">
+        <div class="card-media"><img loading="lazy" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80" alt="3D placeholder"></div>
+        <div class="card-media" style="margin-top:10px;">
+          <iframe class="lazy" title="Spline scene" loading="lazy" src="" frameborder="0" allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER / CTA -->
+  <footer id="contact" class="grid-bg">
+    <div class="container" data-anim="fade-in" style="text-align:center; padding: 60px 0;">
+      <h2 class="title" style="-webkit-text-fill-color:initial;color:#fff;background:none;">Ready to build with VisualzVerse?</h2>
+      <a class="btn btn-primary" href="mailto:hello@example.com"><i class="fa-solid fa-envelope"></i> GET ACCESS</a>
+      <div class="socials">
+        <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+        <a href="#" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+      </div>
+      <p style="color:var(--muted); margin-top:12px;">© <span id="year"></span> VisualzVerse · All rights reserved</p>
+    </div>
+  </footer>
+
+  <!-- EXIT-INTENT MODAL -->
+  <div id="exitModal" class="exit-modal" hidden>
+    <style>
+      .exit-modal{ position:fixed; inset:0; display:grid; place-items:center; z-index:1200; }
+      .exit-modal[hidden]{ display:none; }
+      .exit-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.92); backdrop-filter: blur(10px); }
+      .exit-dialog{
+        position:relative; width:min(520px,92vw); background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border:2px solid var(--primary); border-radius:18px; padding: 26px;
+        box-shadow: 0 20px 60px rgba(255,51,102,.3);
+      }
+      .exit-close{ position:absolute; right:12px; top:10px; background:none; border:none; color:#fff; font-size:24px; cursor:pointer; }
+    </style>
+    <div class="exit-backdrop"></div>
+    <div class="exit-dialog" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+      <button class="exit-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      <h3 id="exitTitle" style="margin:0 0 8px; font-size:1.8rem;">Wait! Don’t miss this offer</h3>
+      <p style="color:var(--gray); margin:0 0 16px;">Join now for just $10/mo. 90-day risk-free guarantee.</p>
+      <a class="btn btn-primary" href="#contact"><i class="fa-solid fa-arrow-right"></i> GET ACCESS</a>
+    </div>
   </div>
-</div>
-</body></html>
+
+  <script>
+    /* ===== HELPERS ===== */
+    const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
+
+    /* ===== NAV SCROLL EFFECT ===== */
+    const nav = $('#nav');
+    window.addEventListener('scroll', ()=>{
+      if(window.scrollY > 60) nav.classList.add('scrolled'); else nav.classList.remove('scrolled');
+    });
+
+    /* ===== IN-VIEW ANIMATIONS + LAZY LOAD ===== */
+    const io=new IntersectionObserver((entries)=>{
+      for(const e of entries){
+        if(e.isIntersecting){
+          e.target.classList.add('in');
+          if(e.target.matches('img.lazy, iframe.lazy, video.lazy')){
+            const src=e.target.dataset?.src || e.target.getAttribute('data-src');
+            if(src){ if(e.target.tagName==='VIDEO'){ e.target.src=src; e.target.load(); } else { e.target.src=src; } }
+            e.target.addEventListener('loadeddata',()=>e.target.classList.add('is-loaded'),{once:true});
+            e.target.addEventListener('load',()=>e.target.classList.add('is-loaded'),{once:true});
+          }
+        }else{
+          e.target.classList.remove('in');
+        }
+      }
+    },{threshold:.15});
+    $$('[data-anim], img.lazy, iframe.lazy, video.lazy]').forEach(el=>io.observe(el));
+
+    /* ===== COUNTERS ===== */
+    let countersStarted=false;
+    const counters=$$('.vv-num');
+    const countersIO=new IntersectionObserver((es)=>{
+      es.forEach(e=>{
+        if(e.isIntersecting && !countersStarted){
+          countersStarted=true; counters.forEach(el=>animateCount(el)); countersIO.disconnect();
+        }
+      });
+    },{threshold:.5});
+    counters.forEach(el=>countersIO.observe(el));
+    function animateCount(el){
+      const target=Number(el.dataset.count||0);
+      const dur=1600, start=performance.now();
+      const fmt=n=>new Intl.NumberFormat().format(Math.floor(n));
+      function tick(now){
+        const t=Math.min(1,(now-start)/dur), eased=1-Math.pow(1-t,3);
+        el.textContent=fmt(target*eased);
+        if(t<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    /* ===== PORTFOLIO VIDEO HOVER/CLICK ===== */
+    $$('.p-video').forEach(v=>{
+      v.addEventListener('mouseenter', ()=>{ try{ v.muted=true; v.play(); }catch{} });
+      v.addEventListener('mouseleave', ()=>{ try{ v.pause(); v.currentTime=0; }catch{} });
+      v.addEventListener('click', ()=>{ try{ v.muted=false; v.currentTime=0; v.play(); }catch{} });
+    });
+
+    /* ===== CAROUSEL BUTTONS ===== */
+    const track=$('.carousel-track');
+    if(track){
+      $('.carousel-btn.prev')?.addEventListener('click', ()=> track.scrollBy({left:-track.clientWidth*0.8, behavior:'smooth'}));
+      $('.carousel-btn.next')?.addEventListener('click', ()=> track.scrollBy({left: track.clientWidth*0.8, behavior:'smooth'}));
+    }
+
+    /* ===== TIMELINE HIGHLIGHT ===== */
+    const stepIO=new IntersectionObserver((ents)=>{ ents.forEach(e=> e.target.classList.toggle('is-active', e.isIntersecting)); }, {threshold:.6});
+    $$('.step').forEach(s=>stepIO.observe(s));
+
+    /* ===== FAQ ACCORDION (one open) ===== */
+    $$('.faq .item .btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const item = btn.closest('.item');
+        const open = item.classList.contains('open');
+        $$('.faq .item').forEach(i=>i.classList.remove('open'));
+        if(!open) item.classList.add('open');
+      });
+    });
+
+    /* ===== EXIT-INTENT MODAL ===== */
+    const exit = $('#exitModal');
+    function showExit(){ if(!exit || localStorage.getItem('vv_exit_shown')) return; exit.hidden=false; localStorage.setItem('vv_exit_shown','1'); }
+    function closeExit(){ if(exit) exit.hidden=true; }
+    $('.exit-backdrop')?.addEventListener('click', closeExit);
+    $('.exit-close')?.addEventListener('click', closeExit);
+    if(window.matchMedia('(pointer:fine)').matches){
+      document.addEventListener('mousemove', e=>{ if(e.clientY<10) showExit(); }, {once:true});
+    } else {
+      // Mobile fallback: show after slight delay + scroll
+      let scrolled=false; window.addEventListener('scroll', ()=>{ scrolled=true; }, {once:true});
+      setTimeout(()=>{ if(scrolled) showExit(); }, 20000); // 20s after first scroll
+    }
+
+    /* ===== FOOTER YEAR ===== */
+    const y=$('#year'); if(y) y.textContent=(new Date()).getFullYear();
+
+    /* ===== YOUTUBE HERO UNMUTE (via Iframe API) ===== */
+    (function setupYT(){
+      const btn=$('#unmuteBtn');
+      const iframe=$('#heroYT');
+      if(!btn || !iframe) return;
+
+      const tag=document.createElement('script');
+      tag.src="https://www.youtube.com/iframe_api";
+      document.head.appendChild(tag);
+
+      let player=null;
+      window.onYouTubeIframeAPIReady=function(){
+        player=new YT.Player('heroYT',{ events:{ 'onReady':()=>{} }, playerVars:{ 'origin': window.location.origin } });
+      };
+
+      btn.addEventListener('click', ()=>{
+        try{
+          if(player){
+            player.unMute(); player.seekTo(0,true); player.playVideo();
+            btn.style.display='none'; btn.setAttribute('aria-pressed','true');
+          } else {
+            const base="https://www.youtube.com/embed/LXb3EKWsInQ";
+            iframe.src=base+"?autoplay=1&loop=1&playlist=LXb3EKWsInQ&controls=1&rel=0&modestbranding=1";
+            btn.style.display='none';
+          }
+        }catch(e){}
+      });
+    })();
+  </script>
+</body>
+</html>
